@@ -1,0 +1,10 @@
+-> convertir un string par exemple "78 999,00"  qui représente un montant en séparateur de milliers en bigDecimal (78999.00)
+
+
+public static void main(String[] args) {
+		String test = "78 999,00".replaceAll("[\\s\u00A0]", "").replace(",", ".");
+		log.info("test : {}", test);
+		BigDecimal testb = new BigDecimal(test);
+		log.info("testb : {}", testb);
+        
+}
