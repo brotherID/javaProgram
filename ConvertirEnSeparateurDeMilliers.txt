@@ -1,0 +1,27 @@
+
+import java.text.NumberFormat;
+import java.math.BigDecimal;
+
+
+public static void main(String[] args) {
+
+        // <=  jdk 8 
+		 
+		BigDecimal bdEscompte = new BigDecimal(345555.32);
+		System.out.println("bdEscompte : " + bdEscompte);
+		System.out.println("test :" + String.format("%,.2f", bdEscompte));
+
+        // >= jdk 11
+
+		NumberFormat nf = NumberFormat.getNumberInstance(Locale.FRENCH);
+
+		// Définir le nombre de décimales souhaitées
+		nf.setMaximumFractionDigits(2);
+		nf.setMinimumFractionDigits(2);
+
+		// Formater le nombre
+		String formattedValue = nf.format(bdEscompte);
+
+		System.out.println("test 2 :" + formattedValue);
+
+}
