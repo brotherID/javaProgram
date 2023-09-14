@@ -1,0 +1,15 @@
+-> verifier une valeur double si elle est inférieur / supérieure ou égale à 50% 
+
+public class VerifierPourcentage {
+    public static void main(String[] args) {
+        // La valeur de type double que vous souhaitez vérifier
+        double valeur = 0.35; // Remplacez cette valeur par celle que vous souhaitez vérifier
+
+        // Vérifie si la valeur est inférieure à 50%
+        if (valeur < 0.5) {
+            System.out.println("La valeur " + valeur + " est inférieure à 50%.");
+        } else {
+            System.out.println("La valeur " + valeur + " est égale ou supérieure à 50%.");
+        }
+    }
+}
