@@ -1,0 +1,28 @@
+-> requete HQL 
+@Query("SELECT r FROM Remise r WHERE " +
+	        " CAST(r.dateRemise AS date) = :z AND " +
+	        " LOWER(r.typeValeur) LIKE LOWER(CONCAT('%', :tv, '%')) AND " +
+	        " (LOWER(r.capturePoint) LIKE LOWER(CONCAT('%', :y, '%')) OR " +
+	        "  LOWER(r.ribRemettant) LIKE LOWER(CONCAT('%', :y, '%')) OR " +
+	        "  LOWER(r.nomRemettant) LIKE LOWER(CONCAT('%', :y, '%')) OR " +
+	        "  LOWER(r.referenceRemise) LIKE LOWER(CONCAT('%', :y, '%'))) AND " +
+	        " r.from = :from")
+	Page<Remise> getRemiseByCapturePointAndMotCleAndDateRemise(
+	        @Param("tv") String typeValeur,
+	        @Param("y") String motCle,
+	        @Param("z") Date dateReimse,
+	        Pageable p,
+	        @Param("from") String from);
+-> requete Sql ( dans la base de données postgresql)
+SELECT * 
+FROM public.t_remise
+WHERE 
+    CAST(d_date_remise AS DATE) = '2023-06-21' 
+    AND s_type_valeur ILIKE '%CHQ%'
+    AND (
+        s_capture_point ILIKE '%GROUP%' 
+        OR s_rib_remettant ILIKE '%GROUP%' 
+        OR s_nom_remettant ILIKE '%GROUP%'
+        OR s_reference_remise ILIKE '%GROUP%'
+    )
+    AND s_from = 'web';
