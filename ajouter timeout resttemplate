@@ -1,0 +1,53 @@
+-> cette fonction getClientHttpRequestFactory() permet d'ajouter  du timeout (10 secondes) à la fonction restemplate 
+
+
+package dev.procheck.captureweb.service.impl;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import dev.procheck.captureweb.dto.DateDto;
+import dev.procheck.captureweb.dto.InputValeur;
+import dev.procheck.captureweb.response.api.ia.DateResponse;
+import dev.procheck.captureweb.service.ConformiteDateValeurService;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+public class ConformiteDateValeurServiceImpl implements ConformiteDateValeurService {
+
+	@Value("${URL_AI_Date}")
+	private String uriDate;
+
+	@Override
+	public DateDto checkConformiteDateValeur(InputValeur inputValeur) {
+		log.info("Begin checkConformiteDateValeur in ConformiteDateValeurServiceImpl [ TypeGrain : {} ]",
+				inputValeur.getTypeGrain());
+		DateResponse dateResponse = new DateResponse("", 0, "");
+		DateDto dateDto = new DateDto();
+		try {
+			RestTemplate restTemplateDate = new RestTemplate(getClientHttpRequestFactory());
+			dateResponse = restTemplateDate.postForObject(uriDate, inputValeur, DateResponse.class);
+			dateDto.setExceptionDate("false");
+		} catch (Exception e) {
+			dateDto.setExceptionDate("true");
+			log.info("Exception catched in checkConformiteDateValeur at  ConformiteDateValeurServiceImpl : {}",
+					e.getMessage());
+		}
+		dateDto.setDateResponse(dateResponse);
+		log.info("End checkConformiteDateValeur in ConformiteDateValeurServiceImpl output [ {} ] ", dateDto.toString());
+		return dateDto;
+	}
+	
+	
+	private SimpleClientHttpRequestFactory getClientHttpRequestFactory() {
+
+	    SimpleClientHttpRequestFactory clientHttpRequestFactory  = new SimpleClientHttpRequestFactory();
+	    clientHttpRequestFactory.setConnectTimeout(10_000);
+	    clientHttpRequestFactory.setReadTimeout(10_000);
+	    return clientHttpRequestFactory;
+	}
+
+}
