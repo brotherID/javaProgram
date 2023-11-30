@@ -1,0 +1,77 @@
+Pourquoi le serveur renvoie la réponse 307 du restTemplate et renvoie 200 dans postman, même lorsque nous avons envoyé la même demande?
+-> Une réponse 307 TEMPORARY_REDIRECT du serveur indique que le serveur demande au client (dans ce cas, votre application) d'émettre la demande vers une URL différente. Cela peut se produire pour diverses raisons, telles que l'équilibrage de charge, la réécriture d'URL ou les mécanismes de sécurité.
+Lorsque vous testez la même demande dans Postman et recevez une réponse 200 OK, cela signifie que Postman suit automatiquement la redirection et envoie la demande à l'URL redirigée. Cependant, lorsque vous utilisez RestTemplate, il ne suit pas automatiquement les redirections par défaut.
+
+
+
+
+package dev.procheck.captureweb.service.impl;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import dev.procheck.captureweb.input.api.ia.RognageInput;
+import dev.procheck.captureweb.response.api.ia.RognageResponse;
+import dev.procheck.captureweb.service.RognageApiService;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+public class RognageApiServiceImpl implements RognageApiService {
+
+	@Value("${URL_AI_Rognage}")
+	private String rognage_Api_URL;
+
+	@Override
+	public RognageResponse consumeApiRognage(RognageInput rognageInput) {
+		log.info("Begin consumeApiRognage in RognageApiServiceImpl input [{}] ",rognageInput.toString());
+		RognageResponse rognageResponse = new RognageResponse("");
+		try {
+			RestTemplate restTemplate = new RestTemplate(getClientHttpRequestFactory());			
+			ResponseEntity<Map> res = restTemplate.postForEntity(rognage_Api_URL, rognageInput, Map.class);
+			log.info("Execution api Rognage[ StatusCode : {}, rognage_Api_URL : {} , responseBody : {} , response : {}] ",res.getStatusCode(), rognage_Api_URL, res.getBody(),res);
+			if (res.getStatusCode().is3xxRedirection()) {
+			    // Récupérez l'en-tête "Location" pour obtenir l'URL de redirection
+			    HttpHeaders headers = res.getHeaders();
+			    List<String> locationHeader = headers.get("Location");
+			    if (!locationHeader.isEmpty()) {
+			        String redirectUrl = locationHeader.get(0);
+
+			        // Effectuez une nouvelle requête vers l'URL de redirection
+			        ResponseEntity<RognageResponse> redirectedResponse = restTemplate.postForEntity(redirectUrl, rognageInput, RognageResponse.class);
+			        log.info("Redirection [ StatusCode : {} , redirectUrl : {} , bodyresponse : {} ] ", redirectedResponse.getStatusCode(), redirectUrl, redirectedResponse.getBody());
+			        if(redirectedResponse.getBody()!=null)
+			        {
+			        	rognageResponse.setImage(redirectedResponse.getBody().getImage());
+			        }
+			    } else {
+			        log.info("La redirection n'a pas d'en-tête Location.");
+			    }
+			} else {
+				log.info("->Execution api Rognage[ StatusCode : {}, rognage_Api_URL : {} , responseBody : {} , response : {}] ",res.getStatusCode(), rognage_Api_URL, res.getBody(),res);
+			}
+		} catch (Exception e) {
+			log.info("Exception catched in consumeApiRognage at RognageApiServiceImpl  : {}", e.getMessage());
+		}
+		log.info("End consumeApiRognage in RognageApiServiceImpl output [{}]",rognageResponse);
+		return rognageResponse;
+	}
+
+	private SimpleClientHttpRequestFactory getClientHttpRequestFactory() {
+
+		SimpleClientHttpRequestFactory clientHttpRequestFactory = new SimpleClientHttpRequestFactory();
+		clientHttpRequestFactory.setConnectTimeout(10_000);
+		clientHttpRequestFactory.setReadTimeout(10_000);
+		return clientHttpRequestFactory;
+	}
+
+}
