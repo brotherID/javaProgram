@@ -1,0 +1,31 @@
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.IOException;
+
+public class DossierExistenceEtCreation {
+
+    public static void verifierEtCreerDossier(String chemin) {
+        Path cheminDuDossier = Paths.get(chemin);
+
+        // Vérifier si le dossier existe
+        if (!Files.exists(cheminDuDossier)) {
+            try {
+                // Créer le dossier s'il n'existe pas
+                Files.createDirectories(cheminDuDossier);
+                System.out.println("Le dossier a été créé avec succès !");
+            } catch (IOException e) {
+                System.err.println("Erreur lors de la création du dossier : " + e.getMessage());
+            }
+        } else {
+            System.out.println("Le dossier existe déjà.");
+        }
+    }
+
+    public static void main(String[] args) {
+        String cheminVersDossier = "chemin/vers/le/dossier";
+
+        // Appel de la méthode pour vérifier et créer le dossier
+        verifierEtCreerDossier(cheminVersDossier);
+    }
+}
