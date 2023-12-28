@@ -1,0 +1,29 @@
+-> ce programme permet de gérer des doublons de valeurs en fonction des critères spécifiques définis par cmc7, typeValeur et une condition isOldValue            
+			
+			Map<String, Boolean> cmc7TypeValeurMap = new HashMap<>();
+			for (Valeur valeur : valeurs) {
+			    String cmc7 = valeur.getCmc7();
+			    String typeValeur = valeur.getTypeValeur();
+			    boolean isOldValue = valeur.getIdValeur().endsWith("_old");
+
+			    // Ajouter ici la logique pour comparer le typeValeur avec le typeValeur de la remise
+			    // Exemple : supposons que le typeValeur de la remise soit stocké dans une variable "typeValeurRemise"
+ 		        String typeValeurRemise = remise.getTypeValeur();
+                log.info("typeValeurRemise : {}",typeValeurRemise);
+			    if (!isOldValue && typeValeur.equals(typeValeurRemise)) {
+			        String key = cmc7 + "_" + typeValeur;
+                    log.info("key : {}",key);
+ 		            Boolean isFirstValue = cmc7TypeValeurMap.getOrDefault(key, true);
+
+			        if (isFirstValue) {
+			            valeur.setDoubling(false); // Première occurrence du cmc7 et typeValeur, marquer comme non doublon
+			            cmc7TypeValeurMap.put(key, false);
+			        } else {
+			            valeur.setDoubling(true); // Les occurrences suivantes, marquer comme doublon
+			        }
+			    }else
+			    {
+			    	valeur.setDoubling(false);
+			    }
+			    valeurRepository.save(valeur);
+			}         
