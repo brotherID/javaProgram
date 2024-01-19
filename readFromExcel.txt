@@ -1,0 +1,88 @@
+package dev.procheck.captureweb.service.impl;
+
+import java.io.FileInputStream;
+import java.util.Iterator;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import dev.procheck.captureweb.entities.NatureAccount;
+import dev.procheck.captureweb.repository.NatureAccountRepository;
+import dev.procheck.captureweb.service.NatureAccountService;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+@Transactional
+public class NatureAccountServiceImpl implements NatureAccountService {
+
+	@Autowired
+	private NatureAccountRepository natureAccountRepository;
+
+	@Override
+	public boolean saveNatureAccount() {
+		log.info("Begin saveNatureAccount in NatureAccountServiceImpl ");
+		String excelFilePath = "/static/excel/NatureAccount.xlsx";
+		try (Workbook workbook = new XSSFWorkbook(new ClassPathResource(excelFilePath).getInputStream())) {
+			Sheet sheet = workbook.getSheetAt(0); // Première feuille du classeur Excel
+			Iterator<Row> iterator = sheet.iterator();
+			while (iterator.hasNext()) {
+				Row currentRow = iterator.next();
+				if (currentRow.getRowNum() < 4) {
+					continue; // Ignorer la première ligne s'il s'agit des en-têtes
+				}
+
+				Cell cellD = currentRow.getCell(3);
+				Cell cellE = currentRow.getCell(4);
+				Cell cellF = currentRow.getCell(5);
+
+				NatureAccount natureAccount = new NatureAccount();
+				natureAccount.setNatureCode(cellD != null ? cellD.getStringCellValue() : null);
+				natureAccount.setTitled(cellE != null ? cellE.getStringCellValue() : null);
+				natureAccount.setEligibility(cellF != null ? cellF.getStringCellValue() : null);
+				natureAccountRepository.save(natureAccount);
+			}
+		} catch (Exception e) {
+			log.info("Exception catched in saveNatureAccount at NatureAccountServiceImpl , [{}] ", e.getMessage());
+			log.info("End saveNatureAccount in NatureAccountServiceImpl ");
+			return false;
+		}
+		log.info("End saveNatureAccount in NatureAccountServiceImpl ");
+		return true;
+
+	}
+
+}
+
+
+*************************************************************************************************
+
+dependences utilisées :
+
+
+                <dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi</artifactId>
+		    <version>5.2.3</version>
+		</dependency>
+		<dependency>
+	            <groupId>org.apache.poi</groupId>
+	            <artifactId>poi-ooxml</artifactId>
+	            <version>5.2.3</version> 
+	        </dependency>
+	        <dependency>
+		    <groupId>commons-io</groupId>
+		    <artifactId>commons-io</artifactId>
+		    <version>2.11.0</version> 
+		</dependency>
+
+****************************************************************************************
+NB : pour le fichier excel il existe dans le classpath du projet , exactement dans le chemin  :  /static/excel/NatureAccount.xlsx
