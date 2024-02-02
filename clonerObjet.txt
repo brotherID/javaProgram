@@ -1,0 +1,41 @@
+Pour cloner un objet en Java, vous pouvez utiliser l'interface Cloneable et la méthode clone().
+
+public class Remise implements Cloneable {
+    private int id;
+    private String description;
+
+    // Constructeur, getters, setters, etc.
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+}
+
+
+public class CloneExample {
+    public static void main(String[] args) {
+        try {
+            // Créez un objet Remise
+            Remise originalRemise = new Remise();
+            originalRemise.setId(1);
+            originalRemise.setDescription("Remise originale");
+
+            // Clonez l'objet Remise
+            Remise clonedRemise = (Remise) originalRemise.clone();
+
+            // Affichez les détails de l'objet original
+            System.out.println("Original Remise: " + originalRemise.getId() + ", " + originalRemise.getDescription());
+
+            // Modifiez les détails de l'objet cloné
+            clonedRemise.setId(2);
+            clonedRemise.setDescription("Remise clonée");
+
+            // Affichez les détails de l'objet cloné
+            System.out.println("Cloned Remise: " + clonedRemise.getId() + ", " + clonedRemise.getDescription());
+
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+    }
+}
